@@ -1,0 +1,12 @@
+const path = require('path');
+
+module.exports = {
+    // 設定 config 路徑
+    'config': path.resolve('src/config', 'database.js'),
+    // 設定 models 路徑
+    'models-path': path.resolve('src', 'models'),
+    // 設定 seeders 路徑
+    'seeders-path': path.resolve('src/database', 'seeders'),
+    // 設定 migrations 路徑
+    'migrations-path': path.resolve('src/database', 'migrations')
+}; 

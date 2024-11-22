@@ -12,13 +12,19 @@ const { rateLimit: rateLimitConfig } = require('./src/middlewares/validator');
 const morgan = require('morgan');
 const logger = require('./src/utils/logger');
 const ApiError = require('./src/utils/ApiError');
+const { testConnection } = require('./src/config/database');
 
 // const userRoutes = require('./src/routes/userRoutes');
-const healthRoutes = require('./src/routes/healthRoutes');
+const healthRoutes = require('./src/routes/healthRoutes.js');
 // const exerciseRoutes = require('./src/routes/exerciseRoutes');
 // const dietRoutes = require('./src/routes/dietRoutes');
 
 const app = express();
+logger.info('--------------------------------');
+logger.info(`NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+logger.info('--------------------------------');
+// 數據庫連接測試
+testConnection();
 
 // 中間件
 app.use(helmet());
@@ -83,3 +89,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+module.exports = app;
