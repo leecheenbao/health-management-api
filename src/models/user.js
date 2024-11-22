@@ -4,11 +4,13 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
     class User extends Model {
         static associate(models) {
-            // 定義關聯
-            User.hasMany(models.Reminder, {
-                foreignKey: 'user_id',
-                as: 'reminders'
-            });
+            // 確保 models.Reminder 存在
+            if (models.Reminder) {
+                User.hasMany(models.Reminder, {
+                    foreignKey: 'user_id',
+                    as: 'reminders'
+                });
+            }
         }
     }
 
@@ -48,6 +50,15 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.BOOLEAN,
             defaultValue: false,
             comment: '用戶是否同意隱私政策'
+        },
+        google_id: {
+            type: DataTypes.STRING,
+            unique: true,
+            comment: 'Google ID'
+        },
+        avatar_url: {
+            type: DataTypes.STRING,
+            comment: '用戶頭像URL'
         }
     }, {
         sequelize,

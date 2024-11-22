@@ -28,13 +28,35 @@ const colors = {
 
 winston.addColors(colors);
 
-// 定義日誌格式
+// 獲取調用者的文件信息
+const getCallerInfo = () => {
+    try {
+        const err = new Error();
+        Error.captureStackTrace(err);
+        const callerStack = err.stack.split('\n')[3];
+        const match = callerStack.match(/\((.*):\d+:\d+\)$/);
+        if (match) {
+            const fullPath = match[1];
+            // 分割路徑並獲取最後兩個部分
+            const pathParts = fullPath.split('/');
+            const lastTwoParts = pathParts.slice(-2);
+            return '/' + lastTwoParts.join('/');
+        }
+        return 'unknown';
+    } catch (error) {
+        return 'unknown';
+    }
+};
+
+// 修改日誌格式
 const format = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
-  winston.format.colorize({ all: true }),
-  winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}`
-  )
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
+    winston.format.colorize({ all: true }),
+    winston.format.printf((info) => {
+        // 添加文件名到日誌信息中
+        const caller = info.caller || getCallerInfo();
+        return `${info.timestamp} [${caller}] ${info.level}: ${info.message}`;
+    })
 );
 
 // 定義日誌傳輸目標
@@ -77,7 +99,7 @@ logger.stream = {
 
 // 請求日誌格式化
 logger.formatRequestLog = (req, res, responseTime) => {
-  return `${req.method} ${req.url} ${res.statusCode} ${responseTime}ms`;
+  return `${req.method} ${req.url} ${res.statusCode}`;
 };
 
 // 錯誤日誌格式化

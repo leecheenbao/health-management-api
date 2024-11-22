@@ -5,7 +5,6 @@ const helmet = require('helmet');
 const errorMiddleware = require('./src/middlewares/error');
 const session = require('express-session');
 const passport = require('./src/config/passport');
-const authRoutes = require('./src/routes/authRoutes');
 const rateLimit = require('express-rate-limit');
 const { notFound, errorHandler } = require('./src/middlewares/error');
 const { rateLimit: rateLimitConfig } = require('./src/middlewares/validator');
@@ -13,16 +12,19 @@ const morgan = require('morgan');
 const logger = require('./src/utils/logger');
 const ApiError = require('./src/utils/ApiError');
 const { testConnection } = require('./src/config/database');
+const BASE_URL = process.env.BASE_URL;
+
+const healthRoutes = require('./src/routes/healthRoutes.js');
+const authRoutes = require('./src/routes/authRoutes');
 
 // const userRoutes = require('./src/routes/userRoutes');
-const healthRoutes = require('./src/routes/healthRoutes.js');
 // const exerciseRoutes = require('./src/routes/exerciseRoutes');
 // const dietRoutes = require('./src/routes/dietRoutes');
 
 const app = express();
 logger.info('--------------------------------');
 logger.info(`NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
-logger.info('--------------------------------');
+
 // 數據庫連接測試
 testConnection();
 
@@ -55,14 +57,13 @@ app.use(rateLimit(rateLimitConfig));
 // 使用 morgan 進行 HTTP 請求日誌記錄
 app.use(morgan('combined', { stream: logger.stream }));
 
+logger.info(`BASE_URL: ${BASE_URL}`);
+
 // 路由
-// app.use('/api/users', userRoutes);
-app.use('/api/health', healthRoutes);
-// app.use('/api/exercise', exerciseRoutes);
-// app.use('/api/diet', dietRoutes);
+app.use(`${BASE_URL}/health`, healthRoutes);
 
 // 認證路由
-app.use('/auth', authRoutes);
+app.use(`${BASE_URL}/auth`, authRoutes);
 
 // 404 處理
 app.use(notFound);
@@ -85,9 +86,11 @@ app.use((err, req, res, next) => {
   });
 });
 
+logger.info(`PORT: ${process.env.PORT}`);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  logger.info(`Server is running on port ${PORT}`);
+  logger.info('--------------------------------');
 });
 
 module.exports = app;

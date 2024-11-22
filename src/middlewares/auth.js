@@ -9,7 +9,7 @@ const authMiddleware = {
       if (!token) {
         return res.status(401).json({
           success: false,
-          message: '未提供認證令牌'
+          message: '未提供 Token'
         });
       }
 
@@ -19,7 +19,7 @@ const authMiddleware = {
     } catch (error) {
       return res.status(401).json({
         success: false,
-        message: '無效的認證令牌'
+        message: '無效的 Token'
       });
     }
   },

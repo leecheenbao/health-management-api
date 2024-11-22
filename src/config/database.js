@@ -1,5 +1,6 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
+const logger = require('../utils/logger');
 
 // Sequelize 實例配置
 const sequelizeConfig = {
@@ -32,9 +33,9 @@ const sequelize = new Sequelize(
 const testConnection = async () => {
     try {
         await sequelize.authenticate();
-        console.log('數據庫連接成功。');
+        logger.info('數據庫連接成功。');
     } catch (error) {
-        console.error('無法連接到數據庫:', error);
+        logger.error(`無法連接到數據庫: ${error}`);
         process.exit(1);
     }
 };
@@ -43,9 +44,9 @@ const testConnection = async () => {
 const syncDatabase = async (force = false) => {
     try {
         await sequelize.sync({ force });
-        console.log('數據庫同步成功');
+        logger.info('數據庫同步成功');
     } catch (error) {
-        console.error('數據庫同步錯誤:', error);
+        logger.error(`數據庫同步錯誤: ${error}`);
         process.exit(1);
     }
 };

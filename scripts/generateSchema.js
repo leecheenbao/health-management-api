@@ -1,6 +1,7 @@
 const { sequelize } = require('../src/config/database');
 const fs = require('fs');
 const path = require('path');
+const logger = require('../src/utils/logger');
 
 async function generateSchema() {
     try {
@@ -23,7 +24,7 @@ async function generateSchema() {
 
         // 獲取每個表的創建語句
         for (const table of tables) {
-            console.log(`正在處理表格: ${table}`);
+            logger.info(`正在處理表格: ${table}`);
             
             // 獲取表註釋
             const [tableInfo] = await sequelize.query(`SHOW TABLE STATUS WHERE Name = '${table}'`);
@@ -49,14 +50,14 @@ async function generateSchema() {
         const filePath = path.join(__dirname, `../sql/schema_${timestamp}.sql`);
         fs.writeFileSync(filePath, schemaSQL, 'utf8');
 
-        console.log(`Schema 已成功導出到 ${filePath}`);
+        logger.info(`Schema 已成功導出到 ${filePath}`);
         
         // 關閉連接
         await sequelize.close();
         
     } catch (error) {
-        console.error('生成 Schema 時發生錯誤:', error);
-        console.error(error.stack);
+        logger.error(`生成 Schema 時發生錯誤: ${error}`);
+        logger.error(error.stack);
         process.exit(1);
     }
 }
