@@ -14,16 +14,16 @@ const ApiError = require('./src/utils/ApiError');
 const { testConnection } = require('./src/config/database');
 const BASE_URL = process.env.BASE_URL;
 
-const healthRoutes = require('./src/routes/healthRoutes');
-const authRoutes = require('./src/routes/authRoutes');
+const authRoutes = require('./src/routes/01_authRoutes');
+const userRoutes = require('./src/routes/02_userRoutes');
+const healthRoutes = require('./src/routes/03_healthRoutes');
+// const verificationRoutes = require('./src/routes/04_verificationRoutes');
 
-// const userRoutes = require('./src/routes/userRoutes');
-// const exerciseRoutes = require('./src/routes/exerciseRoutes');
-// const dietRoutes = require('./src/routes/dietRoutes');
 
 const app = express();
 logger.info('--------------------------------');
 logger.info(`NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+logger.info(`BASE_URL: ${BASE_URL}`);
 
 // 數據庫連接測試
 testConnection();
@@ -55,9 +55,8 @@ app.use(passport.session());
 app.use(rateLimit(rateLimitConfig));
 
 // 使用 morgan 進行 HTTP 請求日誌記錄
-app.use(morgan('combined', { stream: logger.stream }));
+// app.use(morgan('combined', { stream: logger.stream }));
 
-logger.info(`BASE_URL: ${BASE_URL}`);
 
 // 路由
 app.use(`${BASE_URL}/health`, healthRoutes);

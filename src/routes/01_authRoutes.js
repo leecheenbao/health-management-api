@@ -6,7 +6,7 @@ const authService = require('../services/authService.js');
 const logger = require('../utils/logger.js');
 
 /**
- * @api {get} /auth/google Google 登入
+ * @api {get} /auth/google 01.Google 登入
  * @apiName GoogleLogin
  * @apiGroup 01.登入
  * @apiSuccess {String} message 登入成功
@@ -19,7 +19,7 @@ router.get('/google',
 );
 
 /**
- * @api {get} /auth/google/callback Google 登入回調
+ * @api {get} /auth/google/callback 02.Google 登入回調
  * @apiName GoogleCallback
  * @apiGroup 01.登入
  * @apiSuccess {String} message 登入成功
@@ -45,7 +45,7 @@ router.get('/google/callback',
 );
 
 /**
- * @api {get} /auth/logout 登出
+ * @api {get} /auth/logout 03.登出
  * @apiName Logout
  * @apiGroup Auth
  * @apiSuccess {String} message 登出成功
@@ -61,25 +61,5 @@ router.get('/logout', async (req, res) => {
         });
     }
 });
-
-/**
- * @api {get} /auth/protected 受保護的路由
- * @apiName ProtectedRoute
- * @apiGroup Auth
- * @apiSuccess {String} message 訪問成功
- */
-router.get('/protected', 
-    async (req, res) => {
-        try {
-            const result = await authService.verifyProtectedAccess(req.user);
-            res.json(result);
-        } catch (error) {
-            res.status(401).json({
-                message: '訪問驗證失敗',
-                error: error.message
-            });
-        }
-    }
-);
 
 module.exports = router; 

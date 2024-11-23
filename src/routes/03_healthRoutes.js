@@ -19,13 +19,14 @@ const logger = require('../utils/logger');
  * @apiSuccess {Object[]} healthRecords 健康數據列表
  */
 router.get('/records',
-  verifyToken,                    // 驗證 Token
-  checkRole(['admin', 'doctor']), // 檢查角色
+  // verifyToken,                    // 驗證 Token
+  // checkRole(['admin', 'doctor']), // 檢查角色
   sanitizeData,                   // 數據清理
   validate,                       // 驗證數據
   asyncHandler(async (req, res) => {
     // 處理請求
     logger.info('健康數據相關路由');
+    res.json({ message: '健康數據相關路由' });
   })
 );
 // router.get('/records', healthController.getHealthRecords);

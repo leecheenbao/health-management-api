@@ -55,27 +55,6 @@ class AuthService {
             });
         });
     }
-
-    /**
-     * 驗證受保護路由的訪問
-     * @param {Object} user - 用戶對象
-     * @returns {Object} 訪問結果
-     */
-    async verifyProtectedAccess(user) {
-        try {
-            // 這裡可以添加額外的訪問權限驗證邏輯
-
-
-
-            return {
-                message: '訪問成功',
-                user
-            };
-        } catch (error) {
-            logger.error('訪問驗證錯誤:', error);
-            throw error;
-        }
-    }
 }
 
 module.exports = new AuthService(); 

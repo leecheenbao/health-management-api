@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+const jwtUtil = require('../config/jwt');
 
 const authMiddleware = {
   // 驗證 JWT Token
@@ -13,7 +13,7 @@ const authMiddleware = {
         });
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwtUtil.verify(token, process.env.JWT_SECRET);
       req.user = decoded;
       next();
     } catch (error) {
