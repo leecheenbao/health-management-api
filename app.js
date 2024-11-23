@@ -14,7 +14,7 @@ const ApiError = require('./src/utils/ApiError');
 const { testConnection } = require('./src/config/database');
 const BASE_URL = process.env.BASE_URL;
 
-const healthRoutes = require('./src/routes/healthRoutes.js');
+const healthRoutes = require('./src/routes/healthRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 
 // const userRoutes = require('./src/routes/userRoutes');
@@ -63,7 +63,7 @@ logger.info(`BASE_URL: ${BASE_URL}`);
 app.use(`${BASE_URL}/health`, healthRoutes);
 
 // 認證路由
-app.use(`${BASE_URL}/auth`, authRoutes);
+app.use('/auth', authRoutes);
 
 // 404 處理
 app.use(notFound);
