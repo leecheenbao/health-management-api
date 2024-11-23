@@ -15,6 +15,10 @@ const upload = multer({
 
 /**
  * @api {post} /verification/upload 上傳藥盒照片
+ * @apiName UploadMedicationImage
+ * @apiGroup Verification
+ * @apiParam {File} image 藥盒照片
+ * @apiSuccess {Object} batch 上傳的藥盒照片
  */
 router.post('/upload', [
     verifyToken,
@@ -33,6 +37,10 @@ router.post('/upload', [
 
 /**
  * @api {post} /verification/batch-numbers 批量添加藥品批號
+ * @apiName AddBatchNumbers
+ * @apiGroup Verification
+ * @apiParam {Array} batchNumbers 藥品批號列表
+ * @apiSuccess {Object} batches 添加的藥品批號列表
  */
 router.post('/batch-numbers', [
     verifyToken,
@@ -50,6 +58,10 @@ router.post('/batch-numbers', [
 
 /**
  * @api {post} /verification/verify/:batchNumber 驗證藥品批號
+ * @apiName VerifyBatchNumber
+ * @apiGroup Verification
+ * @apiParam {String} batchNumber 藥品批號
+ * @apiSuccess {Object} batch 驗證結果
  */
 router.post('/verify/:batchNumber', [
     verifyToken,
@@ -67,6 +79,9 @@ router.post('/verify/:batchNumber', [
 
 /**
  * @api {get} /verification/status 獲取驗證狀態
+ * @apiName GetVerificationStatus
+ * @apiGroup Verification
+ * @apiSuccess {Object} status 驗證狀態
  */
 router.get('/status', [
     verifyToken,
