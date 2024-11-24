@@ -15,7 +15,7 @@ const { testConnection } = require('./src/config/database');
 const BASE_URL = process.env.BASE_URL;
 
 const authRoutes = require('./src/routes/01_authRoutes');
-const userRoutes = require('./src/routes/02_userRoutes');
+// const userRoutes = require('./src/routes/02_userRoutes');
 const healthRoutes = require('./src/routes/03_healthRoutes');
 // const verificationRoutes = require('./src/routes/04_verificationRoutes');
 

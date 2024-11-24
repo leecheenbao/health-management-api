@@ -30,17 +30,17 @@ router.get('/google/callback',
         session: true 
     }),
     async (req, res) => {
-        try {
+        // try {
             const result = await authService.handleGoogleLogin(req.user, req);
             res.json(result);
-        } catch (error) {
-            logger.error('登入回調錯誤:', error);
-            await authService.handleLogout(req.logout.bind(req));
-            res.status(500).json({
-                message: '登入過程發生錯誤',
-                error: error.message
-            });
-        }
+        // } catch (error) {
+        //     logger.error('登入回調錯誤:', error);
+        //     await authService.handleLogout(req.logout.bind(req));
+        //     res.status(500).json({
+        //         message: '登入過程發生錯誤',
+        //         error: error.message
+        //     });
+        // }
     }
 );
 

@@ -1,5 +1,5 @@
 const logger = require('../utils/logger');
-const jwtUtil = require('../config/jwt.js');
+const JwtService = require('../config/jwt');
 
 class AuthService {
     /**
@@ -10,19 +10,26 @@ class AuthService {
      */
     async handleGoogleLogin(user, req) {
         try {
+            // 獲取登入信息
+            const loginInfo = {
+                ip: req.ip,
+                userAgent: req.headers['user-agent'],
+                deviceInfo: JwtService.parseUserAgent(req.headers['user-agent'])
+            };
 
-            // 生成 JWT token
-            const token = jwtUtil.sign({ 
-                userId: user.id,
-                email: user.email 
+            // 創建登入記錄
+            await user.createLoginRecord({
+                ip_address: loginInfo.ip,
+                user_agent: loginInfo.userAgent,
+                device_info: loginInfo.deviceInfo
             });
 
-            console.log('token', token);
-            // 創建登入記錄
-            await user.createLoginRecord(req);
+            // 生成令牌對
+            const tokens = JwtService.generateTokenPair(user);
 
-            // 返回用戶信息和 token
+            // 返回用戶信息和令牌
             return {
+                success: true,
                 message: '登入成功',
                 user: {
                     id: user.id,
@@ -30,7 +37,7 @@ class AuthService {
                     email: user.email,
                     avatar_url: user.avatar_url
                 },
-                token
+                ...tokens  // 包含 accessToken 和 refreshToken
             };
         } catch (error) {
             logger.error('Google 登入處理錯誤:', error);
@@ -50,10 +57,43 @@ class AuthService {
                     logger.error('登出錯誤:', err);
                     reject(err);
                 } else {
-                    resolve({ message: '登出成功' });
+                    resolve({ 
+                        success: true,
+                        message: '登出成功' 
+                    });
                 }
             });
         });
+    }
+
+    /**
+     * 刷新訪問令牌
+     * @param {string} refreshToken - 刷新令牌
+     * @returns {Promise<Object>} 新的令牌對
+     */
+    async refreshToken(refreshToken) {
+        try {
+            // 驗證刷新令牌
+            const decoded = JwtService.verifyToken(refreshToken);
+            
+            // 檢查用戶是否存在
+            const user = await User.findByPk(decoded.userId);
+            if (!user) {
+                throw new Error('用戶不存在');
+            }
+
+            // 生成新的令牌對
+            const tokens = JwtService.generateTokenPair(user);
+
+            return {
+                success: true,
+                message: '令牌刷新成功',
+                ...tokens
+            };
+        } catch (error) {
+            logger.error('刷新令牌錯誤:', error);
+            throw error;
+        }
     }
 }
 
