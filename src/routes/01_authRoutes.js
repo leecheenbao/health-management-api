@@ -34,85 +34,10 @@ router.get('/google/callback',
         failureRedirect: failureRedirectUrl,
         session: true 
     }),
-    async (req, res) => {
-        try {
-            const result = await authService.handleGoogleLogin(req);
-            logger.info('Google 登入成功，用戶資料:', {
-                userId: result.user?.id,
-                email: result.user?.email
-            });
-            
-            // 將結果存入 session
-            req.session.auth = {
-                user: {
-                    id: result.user.id,
-                    email: result.user.email,
-                    name: result.user.name,
-                    role: result.user.role
-                },
-                token: result.accessToken,
-                isAuthenticated: true,
-                loginTime: new Date().toISOString()
-            };
-            
-            // 使用 Promise 包裝 session 保存
-            await new Promise((resolve, reject) => {
-                req.session.save((err) => {
-                    if (err) {
-                        logger.error('Session 保存錯誤:', err);
-                        reject(new Error('Session 保存失敗'));
-                    }
-                    resolve();
-                });
-            });
-            
-            // 構建重定向 URL
-            const redirectUrl = new URL(successRedirectUrl);
-            redirectUrl.searchParams.append('login_success', 'true');
-            redirectUrl.searchParams.append('token', result.accessToken);
-            
-            // 記錄重定向信息
-            logger.info('重定向到:', redirectUrl.toString());
-            
-            // 執行重定向
-            res.redirect(redirectUrl.toString());
-            
-        } catch (error) {
-            logger.error('登入回調錯誤:', error);
-            
-            // 確保清理 session
-            try {
-                if (req.session) {
-                    await new Promise((resolve) => {
-                        req.session.destroy((err) => {
-                            if (err) logger.error('Session 清理錯誤:', err);
-                            resolve();
-                        });
-                    });
-                }
-                
-                if (req.logout) {
-                    await new Promise((resolve) => {
-                        req.logout((err) => {
-                            if (err) logger.error('登出錯誤:', err);
-                            resolve();
-                        });
-                    });
-                }
-            } catch (cleanupError) {
-                logger.error('清理 session 時發生錯誤:', cleanupError);
-            }
-            
-            // 構建錯誤重定向 URL
-            const errorUrl = new URL(failureRedirectUrl);
-            errorUrl.searchParams.append('error', encodeURIComponent(error.message || '登入失敗'));
-            
-            // 記錄錯誤重定向
-            logger.info('錯誤重定向到:', errorUrl.toString());
-            
-            res.redirect(errorUrl.toString());
-        }
-    }
+    asyncHandler(async (req, res) => {
+        const redirectUrl = await authService.handleGoogleCallback(req, res);
+        res.redirect(redirectUrl);
+    })
 );
 
 /**

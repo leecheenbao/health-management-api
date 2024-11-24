@@ -6,6 +6,129 @@ const { encrypt } = require('../utils/encryption');
 
 class AuthService {
     /**
+     * 處理 Google 登入回調
+     * @param {Object} req Express 請求對象
+     * @param {Object} res Express 響應對象
+     * @returns {Promise<void>}
+     */
+    async handleGoogleCallback(req, res) {
+        try {
+            const data = req;
+
+            // 處理 Google 登入
+            logger.info('Google 登入成功，用戶資料:', {
+                userId: data.user?.id,
+                email: data.user?.email
+            });
+            
+            // 構建 session 數據
+            const sessionData = {
+                user: {
+                    id: data.user.id,
+                    email: data.user.email,
+                    name: data.user.name,
+                    role: data.user.role
+                },
+                token: data.accessToken,
+                isAuthenticated: true,
+                loginTime: new Date().toISOString()
+            };
+
+            // 保存 session
+            await this.saveSession(req, sessionData);
+            
+            // 構建並返回重定向 URL
+            return this.buildSuccessRedirect(data.accessToken);
+
+        } catch (error) {
+            logger.error('Google 登入回調處理失敗:', error);
+            
+            // 清理 session 和登出
+            await this.cleanupSession(req);
+            
+            // 返回錯誤重定向 URL
+            return this.buildErrorRedirect(error.message);
+        }
+    }
+
+    /**
+     * 保存 session 數據
+     * @param {Object} req Express 請求對象
+     * @param {Object} sessionData session 數據
+     * @returns {Promise<void>}
+     */
+    async saveSession(req, sessionData) {
+        return new Promise((resolve, reject) => {
+            req.session.auth = sessionData;
+            req.session.save((err) => {
+                if (err) {
+                    logger.error('Session 保存錯誤:', err);
+                    reject(new Error('Session 保存失敗'));
+                }
+                logger.info('Session 保存成功');
+                resolve();
+            });
+        });
+    }
+
+    /**
+     * 清理 session 和登出
+     * @param {Object} req Express 請求對象
+     * @returns {Promise<void>}
+     */
+    async cleanupSession(req) {
+        try {
+            if (req.session) {
+                await new Promise((resolve) => {
+                    req.session.destroy((err) => {
+                        if (err) logger.error('Session 清理錯誤:', err);
+                        resolve();
+                    });
+                });
+            }
+            
+            if (req.logout) {
+                await new Promise((resolve) => {
+                    req.logout((err) => {
+                        if (err) logger.error('登出錯誤:', err);
+                        resolve();
+                    });
+                });
+            }
+        } catch (error) {
+            logger.error('清理 session 時發生錯誤:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 構建成功重定向 URL
+     * @param {string} token 訪問令牌
+     * @returns {string} 重定向 URL
+     */
+    buildSuccessRedirect(token) {
+        const redirectUrl = new URL(process.env.GOOGLE_SUCCESS_REDIRECT_URL);
+        redirectUrl.searchParams.append('login_success', 'true');
+        redirectUrl.searchParams.append('token', token);
+        
+        logger.info('構建成功重定向 URL:', redirectUrl.toString());
+        return redirectUrl.toString();
+    }
+
+    /**
+     * 構建錯誤重定向 URL
+     * @param {string} errorMessage 錯誤信息
+     * @returns {string} 重定向 URL
+     */
+    buildErrorRedirect(errorMessage) {
+        const errorUrl = new URL(process.env.GOOGLE_FAILURE_REDIRECT_URL);
+        errorUrl.searchParams.append('error', encodeURIComponent(errorMessage || '登入失敗'));
+        
+        logger.info('構建錯誤重定向 URL:', errorUrl.toString());
+        return errorUrl.toString();
+    }
+
+    /**
      * 處理 Google 登入成功後的邏輯
      * @param {Object} user - 用戶對象
      * @param {Object} req - Express 請求對象
@@ -143,8 +266,6 @@ class AuthService {
      */
     async getSessionStatus(session) {
         try {
-            logger.info('處理 session 狀態請求');
-
             if (session?.auth?.isAuthenticated) {
                 // 準備認證用戶的 session 數據
                 const sessionData = {
@@ -157,7 +278,6 @@ class AuthService {
                 // 加密數據
                 const encryptedData = encrypt(JSON.stringify(sessionData));
 
-                logger.info('認證用戶 session 數據加密成功');
                 return {
                     success: true,
                     data: encryptedData
@@ -172,7 +292,6 @@ class AuthService {
                 // 加密數據
                 const encryptedData = encrypt(JSON.stringify(sessionData));
 
-                logger.info('未認證用戶 session 數據加密成功');
                 return {
                     success: false,
                     data: encryptedData
