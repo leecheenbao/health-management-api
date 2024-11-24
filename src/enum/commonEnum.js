@@ -1,0 +1,26 @@
+const COMMON_RESPONSE_CODE = {
+  SUCCESS: 200,
+  BAD_REQUEST: 400,
+  FORBIDDEN: 403,
+  INTERNAL_SERVER_ERROR: 500,
+  NOT_FOUND: 404,
+  TOKEN_REQUIRED: 401,
+  TOKEN_INVALID: 403,
+};
+
+const USER_ROLE = {
+  ADMIN: 1,
+  USER: 0,
+};
+
+// 用戶封鎖狀態
+const USER_STATUS = {
+  ACTIVE: true,
+  INACTIVE: false,
+};
+
+module.exports = {
+  COMMON_RESPONSE_CODE,
+  USER_ROLE,
+  USER_STATUS,
+};

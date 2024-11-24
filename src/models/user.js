@@ -17,13 +17,14 @@ module.exports = (sequelize, DataTypes) => {
             });
         }
 
-        // 實例方法應該定義在這裡
+        /**
+         * 創建登入記錄
+         */
         async createLoginRecord(req) {
             const { LoginRecord } = require('../models');
             const UAParser = require('ua-parser-js');
 
             try {
-                // 檢查 req 是否存在
                 if (!req) {
                     // 創建基本的登入記錄
                     return await LoginRecord.create({
@@ -102,6 +103,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             unique: true,
             comment: '用戶信箱'
+        },
+        role: {
+            type: DataTypes.ENUM('user', 'admin'),
+            defaultValue: 'user',
+            comment: '用戶角色 預設 0:user 1:admin'
         },
         hospital: {
             type: DataTypes.STRING(100),

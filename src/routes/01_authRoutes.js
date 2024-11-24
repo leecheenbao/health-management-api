@@ -8,7 +8,7 @@ const logger = require('../utils/logger.js');
 /**
  * @api {get} /auth/google 01.Google 登入
  * @apiName GoogleLogin
- * @apiGroup 01.登入
+ * @apiGroup 01.登入模組
  * @apiSuccess {String} message 登入成功
  */
 router.get('/google',
@@ -21,7 +21,7 @@ router.get('/google',
 /**
  * @api {get} /auth/google/callback 02.Google 登入回調
  * @apiName GoogleCallback
- * @apiGroup 01.登入
+ * @apiGroup 01.登入模組
  * @apiSuccess {String} message 登入成功
  */
 router.get('/google/callback',
@@ -30,8 +30,13 @@ router.get('/google/callback',
         session: true 
     }),
     async (req, res) => {
+
+        logger.info('--------------------------------');
+        logger.info('Google 登入回調');
+        logger.info('req', req);
+        logger.info('--------------------------------');
         // try {
-            const result = await authService.handleGoogleLogin(req.user, req);
+            const result = await authService.handleGoogleLogin(req);
             res.json(result);
         // } catch (error) {
         //     logger.error('登入回調錯誤:', error);
@@ -47,7 +52,7 @@ router.get('/google/callback',
 /**
  * @api {get} /auth/logout 03.登出
  * @apiName Logout
- * @apiGroup Auth
+ * @apiGroup 01.登入模組
  * @apiSuccess {String} message 登出成功
  */
 router.get('/logout', async (req, res) => {

@@ -2,6 +2,7 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { User } = require('../models');
 const googleConfig = require('./google');
+const { USER_STATUS } = require('../enum/commonEnum');
 
 passport.serializeUser((user, done) => {
     done(null, user.id);
@@ -27,7 +28,10 @@ passport.use(new GoogleStrategy(googleConfig,
                     email: profile.emails[0].value,
                     google_id: profile.id,
                     avatar_url: profile.photos[0].value,
-                    is_active: true,
+                    hospital: '尚未設置',
+                    doctor_name: '尚未設置',
+                    phone: '尚未設置',
+                    is_active: USER_STATUS.ACTIVE,
                     privacy_agreed: true
                 }
             });

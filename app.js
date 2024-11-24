@@ -10,12 +10,12 @@ const { notFound, errorHandler } = require('./src/middlewares/error');
 const { rateLimit: rateLimitConfig } = require('./src/middlewares/validator');
 const morgan = require('morgan');
 const logger = require('./src/utils/logger');
-const ApiError = require('./src/utils/ApiError');
+const { ApiError } = require('./src/utils/apiError');
 const { testConnection } = require('./src/config/database');
 const BASE_URL = process.env.BASE_URL;
 
 const authRoutes = require('./src/routes/01_authRoutes');
-// const userRoutes = require('./src/routes/02_userRoutes');
+const userRoutes = require('./src/routes/02_userRoutes');
 const healthRoutes = require('./src/routes/03_healthRoutes');
 // const verificationRoutes = require('./src/routes/04_verificationRoutes');
 
@@ -57,15 +57,15 @@ app.use(rateLimit(rateLimitConfig));
 // 使用 morgan 進行 HTTP 請求日誌記錄
 // app.use(morgan('combined', { stream: logger.stream }));
 
-
-// 路由
-app.use(`${BASE_URL}/health`, healthRoutes);
-
 // 認證路由
 app.use('/auth', authRoutes);
 
+// 路由
+app.use(`${BASE_URL}/health`, healthRoutes);
+app.use(`${BASE_URL}/user`, userRoutes);
+
 // 404 處理
-app.use(notFound);
+// app.use(notFound);
 
 // 錯誤處理中間件
 app.use((err, req, res, next) => {
@@ -77,12 +77,13 @@ app.use((err, req, res, next) => {
     });
   }
   
-  logger.error(logger.formatError(err));
-  
-  res.status(500).json({
-    success: false,
-    message: '服務器內部錯誤'
-  });
+  // logger.error(logger.formatError(err));
+
+  // res.status(500).json({
+  //   success: false,
+  //   message: '服務器內部錯誤',
+  //   error: err
+  // });
 });
 
 logger.info(`PORT: ${process.env.PORT}`);

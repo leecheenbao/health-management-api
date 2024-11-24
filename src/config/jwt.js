@@ -7,7 +7,6 @@ const config = {
     accessTokenExpiry: process.env.JWT_ACCESS_TOKEN_EXPIRY || '1h',
     refreshTokenExpiry: process.env.JWT_REFRESH_TOKEN_EXPIRY || '7d',
     issuer: process.env.JWT_ISSUER || 'health-management-api',
-    audience: process.env.JWT_AUDIENCE || 'health-management-client'
 };
 
 class JwtService {
@@ -20,7 +19,6 @@ class JwtService {
         return jwt.sign(payload, config.secretKey, {
             expiresIn: config.accessTokenExpiry,
             issuer: config.issuer,
-            audience: config.audience
         });
     }
 
@@ -29,16 +27,14 @@ class JwtService {
         return jwt.sign({ userId }, config.secretKey, {
             expiresIn: config.refreshTokenExpiry,
             issuer: config.issuer,
-            audience: config.audience
         });
     }
 
     // 驗證令牌
     static verifyToken(token) {
-        try {
+        try {            
             return jwt.verify(token, config.secretKey, {
                 issuer: config.issuer,
-                audience: config.audience
             });
         } catch (error) {
             if (error instanceof jwt.TokenExpiredError) {
@@ -59,8 +55,10 @@ class JwtService {
     static generateTokenPair(user) {
         const tokenPayload = {
             id: user.id,
+            username: user.username,
             email: user.email,
-            role: user.role
+            role: user.role,
+            is_active: user.is_active
         };
 
         return {

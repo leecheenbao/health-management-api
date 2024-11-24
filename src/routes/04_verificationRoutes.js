@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const { asyncHandler } = require('../middlewares');
-const { verifyToken } = require('../middlewares/authMiddleware');
+const { authenticateToken } = require('../middlewares/authMiddleware');
 const verificationService = require('../services/verificationService');
 
 // 設置 multer
@@ -21,7 +21,7 @@ const upload = multer({
  * @apiSuccess {Object} batch 上傳的藥盒照片
  */
 router.post('/upload', [
-    verifyToken,
+    authenticateToken,
     upload.single('image'),
     asyncHandler(async (req, res) => {
         const batch = await verificationService.uploadMedicationImage(
@@ -43,7 +43,7 @@ router.post('/upload', [
  * @apiSuccess {Object} batches 添加的藥品批號列表
  */
 router.post('/batch-numbers', [
-    verifyToken,
+    authenticateToken,
     asyncHandler(async (req, res) => {
         const batches = await verificationService.addBatchNumbers(
             req.body.batchNumbers,
@@ -64,7 +64,7 @@ router.post('/batch-numbers', [
  * @apiSuccess {Object} batch 驗證結果
  */
 router.post('/verify/:batchNumber', [
-    verifyToken,
+    authenticateToken,
     asyncHandler(async (req, res) => {
         const batch = await verificationService.verifyBatchNumber(
             req.params.batchNumber,
@@ -84,7 +84,7 @@ router.post('/verify/:batchNumber', [
  * @apiSuccess {Object} status 驗證狀態
  */
 router.get('/status', [
-    verifyToken,
+    authenticateToken,
     asyncHandler(async (req, res) => {
         const status = await verificationService.getVerificationStatus(
             req.user.id

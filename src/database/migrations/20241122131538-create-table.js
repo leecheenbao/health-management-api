@@ -298,26 +298,51 @@ module.exports = {
         // 創建登入記錄表
         await queryInterface.createTable('login_records', {
             id: {
-                type: Sequelize.INTEGER,
-                primaryKey: true,
+                allowNull: false,
                 autoIncrement: true,
-                comment: '登入記錄ID'
-            },
-            user_id: {
+                primaryKey: true,
                 type: Sequelize.INTEGER,
+                comment: '主鍵ID'
+              },
+              user_id: {
+                type: Sequelize.INTEGER,
+                allowNull: false,
                 references: {
-                    model: 'users',
-                    key: 'id'
+                  model: 'users',
+                  key: 'id'
                 },
                 onUpdate: 'CASCADE',
                 onDelete: 'CASCADE',
                 comment: '用戶ID'
-            },
-            login_at: {
+              },
+              login_at: {
                 type: Sequelize.DATE,
                 allowNull: false,
-                defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+                defaultValue: Sequelize.NOW,
                 comment: '登入時間'
+              },
+              ip_address: {
+                type: Sequelize.STRING,
+                allowNull: false,
+                comment: 'IP地址'
+              },
+              user_agent: {
+                type: Sequelize.TEXT,
+                comment: '用戶瀏覽器資訊'
+              },
+              device_info: {
+                type: Sequelize.JSON,
+                comment: '設備資訊（瀏覽器、作業系統等）'
+              },
+              created_at: {
+                allowNull: false,
+                type: Sequelize.DATE,
+                comment: '創建時間'
+              },
+              updated_at: {
+                allowNull: false,
+                type: Sequelize.DATE,
+                comment: '更新時間'
             }
         }, {
             comment: '用戶登入記錄表',

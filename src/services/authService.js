@@ -1,5 +1,7 @@
 const logger = require('../utils/logger');
 const JwtService = require('../config/jwt');
+const { ApiError } = require('../utils/apiError');
+const { User } = require('../models');
 
 class AuthService {
     /**
@@ -8,14 +10,23 @@ class AuthService {
      * @param {Object} req - Express 請求對象
      * @returns {Object} 包含用戶信息和 token 的對象
      */
-    async handleGoogleLogin(user, req) {
+    async handleGoogleLogin(req) {
         try {
+            if (!req.user) {
+                throw new ApiError(200, '用戶不存在');
+            }
             // 獲取登入信息
             const loginInfo = {
                 ip: req.ip,
                 userAgent: req.headers['user-agent'],
                 deviceInfo: JwtService.parseUserAgent(req.headers['user-agent'])
             };
+
+            // 檢查用戶是否存在
+            const user = await User.findByPk(req.user.id);
+            if (!user) {
+                throw new ApiError(200, '用戶不存在');
+            }
 
             // 創建登入記錄
             await user.createLoginRecord({
