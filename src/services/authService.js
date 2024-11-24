@@ -1,6 +1,6 @@
 const logger = require('../utils/logger');
 const JwtService = require('../config/jwt');
-const { ApiError } = require('../utils/apiError');
+const ApiError = require('../utils/apiError');
 const { User } = require('../models');
 
 class AuthService {
@@ -90,7 +90,7 @@ class AuthService {
             // 檢查用戶是否存在
             const user = await User.findByPk(decoded.userId);
             if (!user) {
-                throw new Error('用戶不存在');
+                throw new ApiError(200, '用戶不存在');
             }
 
             // 生成新的令牌對
@@ -103,6 +103,34 @@ class AuthService {
             };
         } catch (error) {
             logger.error('刷新令牌錯誤:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 取得 token
+     * @param {string} email - 用戶Email
+     * @returns {Promise<Object>} 包含 token 的對象
+     */
+    async getToken(email) {
+        try {
+            const user = await User.findOne({ 
+                where: { email },
+            });
+            
+            if (!user) {
+                throw new ApiError(200, '用戶不存在');
+            }
+            const token = JwtService.generateAccessToken({ id: user.id });
+            return {
+                success: true,
+                message: '取得 token 成功',
+                data: {
+                    token
+                }   
+            };
+        } catch (error) {
+            logger.error('取得 token 錯誤:', error);
             throw error;
         }
     }

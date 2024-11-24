@@ -2,11 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const errorMiddleware = require('./src/middlewares/error');
 const session = require('express-session');
 const passport = require('./src/config/passport');
 const rateLimit = require('express-rate-limit');
-const { notFound, errorHandler } = require('./src/middlewares/error');
 const { rateLimit: rateLimitConfig } = require('./src/middlewares/validator');
 const morgan = require('morgan');
 const logger = require('./src/utils/logger');
@@ -63,12 +61,6 @@ app.use('/auth', authRoutes);
 // 路由
 app.use(`${BASE_URL}/health`, healthRoutes);
 app.use(`${BASE_URL}/user`, userRoutes);
-
-// 404 處理
-app.use(notFound);
-
-// 錯誤處理
-app.use(errorHandler);
 
 logger.info(`PORT: ${process.env.PORT}`);
 const PORT = process.env.PORT || 3000;

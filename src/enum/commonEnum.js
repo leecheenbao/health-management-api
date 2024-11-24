@@ -9,8 +9,8 @@ const COMMON_RESPONSE_CODE = {
 };
 
 const USER_ROLE = {
-  ADMIN: 1,
-  USER: 0,
+  ADMIN: 'admin',
+  USER: 'user',
 };
 
 // 用戶封鎖狀態

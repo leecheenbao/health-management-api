@@ -11,7 +11,7 @@ class VerificationService {
      */
     async uploadMedicationImage(file, userId) {
         try {
-            // 上傳圖片到 S3
+            // 上傳圖片到 GSC
             const imageUrl = await uploadToGCS(file);
 
             // 掃描條碼

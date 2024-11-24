@@ -4,6 +4,7 @@ const router = express.Router();
 const jwtUtil = require('../config/jwt.js');
 const authService = require('../services/authService.js');
 const logger = require('../utils/logger.js');
+const asyncHandler = require("../middlewares/asyncHandler");
 
 /**
  * @api {get} /auth/google 01.Google 登入
@@ -35,17 +36,17 @@ router.get('/google/callback',
         logger.info('Google 登入回調');
         logger.info('req', req);
         logger.info('--------------------------------');
-        // try {
+        try {
             const result = await authService.handleGoogleLogin(req);
             res.json(result);
-        // } catch (error) {
-        //     logger.error('登入回調錯誤:', error);
-        //     await authService.handleLogout(req.logout.bind(req));
-        //     res.status(500).json({
-        //         message: '登入過程發生錯誤',
-        //         error: error.message
-        //     });
-        // }
+        } catch (error) {
+            logger.error('登入回調錯誤:', error);
+            await authService.handleLogout(req.logout.bind(req));
+            res.status(500).json({
+                message: '登入過程發生錯誤',
+                error: error.message
+            });
+        }
     }
 );
 
@@ -66,5 +67,18 @@ router.get('/logout', async (req, res) => {
         });
     }
 });
+
+/*
+ * @api {post} /auth/get-token 開發測試用取得 token 的 API
+ * @apiName GetToken
+ * @apiGroup 01.登入模組
+ * @apiParam {String} email 用戶Email
+ * @apiSuccess {String} token 登入 token
+ */
+router.post('/get-token', 
+    asyncHandler(async (req, res) => {
+        const result = await authService.getToken(req.body.email);
+        res.json(result);
+}));
 
 module.exports = router; 

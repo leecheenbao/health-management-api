@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { validate, sanitizeData } = require('../middlewares/validator');
 const { authenticateToken, isAdmin } = require('../middlewares/authMiddleware');
-const { asyncHandler } = require('../middlewares/error');
+const asyncHandler = require('../middlewares/asyncHandler');
 const logger = require('../utils/logger');
 
 /**

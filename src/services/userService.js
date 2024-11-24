@@ -76,8 +76,7 @@ class UserService {
             throw new ApiError(500, '獲取登入歷史失敗');
         }
     }
-
-    // ... 其他方法 ...
+    
 }
 
 module.exports = UserService;

@@ -4,6 +4,10 @@ const ApiError = require('../utils/ApiError');
 const logger = require('../utils/logger');
 const { COMMON_RESPONSE_CODE, USER_STATUS, USER_ROLE } = require('../enum/commonEnum');
 
+// 建立權限回應
+const authResponse = (res, status, message) => {
+  return res.status(status).json({ message });
+};
 /**
  * JWT Token 驗證中間件
  */
@@ -21,7 +25,7 @@ const authenticateToken = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.id;
         const user = await User.findByPk(userId);
-        
+
         if (!user) {
             throw new ApiError(200, '用戶不存在');
         }
@@ -41,7 +45,6 @@ const authenticateToken = async (req, res, next) => {
             status: user.status,
             profile_completed: user.profile_completed
         };
-
         next();
     } catch (error) {
         if (error instanceof jwt.JsonWebTokenError) {
@@ -70,25 +73,12 @@ const authenticateToken = async (req, res, next) => {
 };
 
 /**
- * 檢查用戶是否已完成個人資料
- */
-const checkProfileCompleted = (req, res, next) => {
-    try {
-        if (!req.user.profile_completed) {
-            throw new ApiError(200, '請先完善個人資料');
-        }
-        next();
-    } catch (error) {
-        next(error);
-    }
-};
-
-/**
  * 檢查用戶是否為管理員
  */
 const isAdmin = (req, res, next) => {
+    console.log(req.user.role);
     if (req.user.role !== USER_ROLE.ADMIN) {
-        throw new ApiError(200, '無權限訪問');
+      return authResponse(res, COMMON_RESPONSE_CODE.SUCCESS, "權限不足");
     }
     next();
 };
@@ -97,5 +87,4 @@ const isAdmin = (req, res, next) => {
 module.exports = {
     authenticateToken,
     isAdmin,
-    checkProfileCompleted
 };
