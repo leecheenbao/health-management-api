@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticateToken } = require('../middlewares/authMiddleware');
 const educationalMaterialService = require('../services/educationalMaterialService');
 const asyncHandler = require('../middlewares/asyncHandler');
+const pagination = require('../middlewares/pagination');
 
 /**
  * @api {get} /api/v1/materials 獲取所有衛教素材
@@ -11,7 +12,13 @@ const asyncHandler = require('../middlewares/asyncHandler');
  */
 router.get('/', 
     authenticateToken,
-    asyncHandler(educationalMaterialService.getMaterials)
+    pagination(),
+    asyncHandler(
+        async (req, res) => {
+            const materials = await educationalMaterialService.getMaterials(req.query);
+            res.paginate(materials.records, materials.total);
+        }
+    )
 );
 
 /**
@@ -21,7 +28,12 @@ router.get('/',
  */
 router.get('/:id',
     authenticateToken,
-    asyncHandler(educationalMaterialService.getMaterialById)
+    asyncHandler(
+        async (req, res) => {
+            const material = await educationalMaterialService.getMaterialById(req.params.id);
+            res.json(material);
+        }
+    )
 );
 
 /**
@@ -31,7 +43,12 @@ router.get('/:id',
  */
 router.get('/category/:category',
     authenticateToken,
-    asyncHandler(educationalMaterialService.getMaterialsByCategory)
+    asyncHandler(
+        async (req, res) => {
+            const materials = await educationalMaterialService.getMaterialsByCategory(req.params.category);
+            res.json(materials);
+        }
+    )
 );
 
 /**
@@ -41,27 +58,56 @@ router.get('/category/:category',
  */
 router.get('/tag/:tagName',
     authenticateToken,
-    asyncHandler(educationalMaterialService.getMaterialsByTag)
+    asyncHandler(
+        async (req, res) => {
+            const materials = await educationalMaterialService.getMaterialsByTag(req.params.tagName);
+            res.json(materials);
+        }
+    )
 );
 
 /**
  * @api {post} /api/v1/materials 創建衛教素材
  * @apiName CreateMaterial
  * @apiGroup 03.衛教素材模組
+ * @apiParam {String[]} tags 標籤名稱陣列
+ * @apiParam {String} title 標題
+ * @apiParam {String} content 內容
+ * @apiParam {String} primary_category 主類別
+ * @apiParam {String} secondary_category 次類別
+ * @apiParam {String} image_url 圖片
+ * @apiParam {String} video_url 影片
  */
 router.post('/',
     authenticateToken,
-    asyncHandler(educationalMaterialService.createMaterial)
+    asyncHandler(
+        async (req, res) => {
+            const material = await educationalMaterialService.createMaterial(req.body);
+            res.json(material);
+        }
+    )
 );
 
 /**
  * @api {put} /api/v1/materials/:id 更新衛教素材
  * @apiName UpdateMaterial
  * @apiGroup 03.衛教素材模組
+ * @apiParam {String[]} tags 標籤名稱陣列
+ * @apiParam {String} title 標題
+ * @apiParam {String} content 內容
+ * @apiParam {String} primary_category 主類別
+ * @apiParam {String} secondary_category 次類別
+ * @apiParam {String} image_url 圖片
+ * @apiParam {String} video_url 影片
  */
 router.put('/:id',
     authenticateToken,
-    asyncHandler(educationalMaterialService.updateMaterial)
+    asyncHandler(
+        async (req, res) => {
+            const material = await educationalMaterialService.updateMaterial(req.params.id, req.body);
+            res.json(material);
+        }
+    )
 );
 
 /**
@@ -71,7 +117,12 @@ router.put('/:id',
  */
 router.delete('/:id',
     authenticateToken,
-    asyncHandler(educationalMaterialService.deleteMaterial)
+    asyncHandler(
+        async (req, res) => {
+            const material = await educationalMaterialService.deleteMaterial(req.params.id);
+            res.json(material);
+        }
+    )
 );
 
 /**
@@ -81,7 +132,12 @@ router.delete('/:id',
  */
 router.post('/:id/like',
     authenticateToken,
-    asyncHandler(educationalMaterialService.likeMaterial)
+    asyncHandler(
+        async (req, res) => {
+            const material = await educationalMaterialService.likeMaterial(req.params.id);
+            res.json(material);
+        }
+    )
 ); 
 
 module.exports = router;

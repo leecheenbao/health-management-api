@@ -65,8 +65,7 @@ class EducationalMaterialService {
      */
     async getMaterialById(id) {
         try {
-            const material = await EducationalMaterial.findOne({
-                where: { id, is_active: true },
+            const material = await EducationalMaterial.findByPk(id, {
                 include: [{
                     model: MaterialTag,
                     as: 'tags',
@@ -90,36 +89,78 @@ class EducationalMaterialService {
 
     /**
      * 創建衛教素材
+     * @param {Object} materialData 衛教素材數據
+     * @returns {Promise<Object>} 創建的衛教素材
      */
-    async createMaterial(materialData, tagNames = []) {
-        const transaction = await sequelize.transaction();
-
+    async createMaterial(materialData) {
         try {
-            const material = await EducationalMaterial.create(materialData, {
-                transaction
-            });
+            logger.info('開始創建衛教素材:', materialData);
 
-            if (tagNames.length > 0) {
-                const tags = await Promise.all(
-                    tagNames.map(name => 
-                        MaterialTag.findOrCreate({
-                            where: { name },
-                            transaction
-                        })
-                    )
-                );
+            // 確保必要欄位存在
+            const {
+                title,
+                content,
+                primary_category,
+                secondary_category,
+                tags = [],
+                status = 'draft',
+                image_url,
+                video_url,
+                url
+            } = materialData;
 
-                await material.setTags(
-                    tags.map(([tag]) => tag),
-                    { transaction }
-                );
+            // 驗證必要欄位, 將缺少的欄位回傳
+            if (!title || !content || !primary_category) {
+                throw new Error('缺少必要欄位');
             }
 
-            await transaction.commit();
-            return material;
+            // 創建衛教素材
+            const material = await EducationalMaterial.create({
+                title,
+                content,
+                primary_category,
+                secondary_category,
+                category: primary_category, // 確保 category 與 primary_category 一致
+                status,
+                image: image || null,
+                video: video || null,
+                audio: audio || null,
+                url: url || null
+            });
+
+            // 如果有標籤，創建標籤關聯
+            if (tags.length > 0) {
+                // 處理標籤
+                const tagInstances = await Promise.all(
+                    tags.map(async (tagName) => {
+                        const [tag] = await MaterialTag.findOrCreate({
+                            where: { name: tagName }
+                        });
+                        return tag;
+                    })
+                );
+
+                // 關聯標籤
+                await material.setTags(tagInstances);
+            }
+
+            // 獲取完整的素材數據（包含標籤）
+            const createdMaterial = await EducationalMaterial.findByPk(material.id, {
+                include: [{
+                    model: MaterialTag,
+                    through: { attributes: [] },
+                    as: 'tags'
+                }]
+            });
+
+            logger.info('衛教素材創建成功:', createdMaterial.id);
+
+            return {
+                success: true,
+                data: createdMaterial
+            };
 
         } catch (error) {
-            await transaction.rollback();
             logger.error('創建衛教素材失敗:', error);
             throw error;
         }

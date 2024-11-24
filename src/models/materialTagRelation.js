@@ -31,7 +31,11 @@ module.exports = (sequelize, DataTypes) => {
         sequelize,
         modelName: 'MaterialTagRelation',
         tableName: 'material_tag_relations',
-        timestamps: false
+        timestamps: false,  // 明確設置不使用時間戳記
+        createdAt: false,  // 明確禁用 created_at
+        updatedAt: false,  // 明確禁用 updated_at
+        underscored: true, // 使用下劃線命名
+        freezeTableName: true // 防止 Sequelize 自動修改表名
     });
 
     return MaterialTagRelation;

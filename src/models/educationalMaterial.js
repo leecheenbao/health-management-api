@@ -79,7 +79,11 @@ module.exports = (sequelize, DataTypes) => {
         sequelize,
         modelName: 'EducationalMaterial',
         tableName: 'educational_materials',
-        underscored: true
+        underscored: true,
+        timestamps: false,  // 明確設置不使用時間戳記
+        createdAt: false,  // 明確禁用 created_at
+        updatedAt: false,  // 明確禁用 updated_at
+        freezeTableName: true // 防止 Sequelize 自動修改表名
     });
     
     return EducationalMaterial;
