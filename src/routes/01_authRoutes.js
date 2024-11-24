@@ -5,6 +5,8 @@ const jwtUtil = require('../config/jwt.js');
 const authService = require('../services/authService.js');
 const logger = require('../utils/logger.js');
 const asyncHandler = require("../middlewares/asyncHandler");
+const successRedirectUrl = process.env.GOOGLE_SUCCESS_REDIRECT_URL;
+const failureRedirectUrl = process.env.GOOGLE_FAILURE_REDIRECT_URL;
 
 /**
  * @api {get} /auth/google 01.Google 登入
@@ -27,15 +29,11 @@ router.get('/google',
  */
 router.get('/google/callback',
     passport.authenticate('google', { 
-        failureRedirect: '/login',
+        failureRedirect: failureRedirectUrl,
+        successRedirect: successRedirectUrl,
         session: true 
     }),
     async (req, res) => {
-
-        logger.info('--------------------------------');
-        logger.info('Google 登入回調');
-        logger.info('req', req);
-        logger.info('--------------------------------');
         try {
             const result = await authService.handleGoogleLogin(req);
             res.json(result);
