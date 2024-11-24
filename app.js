@@ -15,6 +15,7 @@ const BASE_URL = process.env.BASE_URL;
 const authRoutes = require('./src/routes/01_authRoutes');
 const userRoutes = require('./src/routes/02_userRoutes');
 const healthRoutes = require('./src/routes/03_healthRoutes');
+const educationalMaterialRoutes = require('./src/routes/04_educationalMaterialRoutes');
 // const verificationRoutes = require('./src/routes/04_verificationRoutes');
 
 
@@ -61,6 +62,7 @@ app.use('/auth', authRoutes);
 // 路由
 app.use(`${BASE_URL}/health`, healthRoutes);
 app.use(`${BASE_URL}/user`, userRoutes);
+app.use(`${BASE_URL}/materials`, educationalMaterialRoutes);
 
 logger.info(`PORT: ${process.env.PORT}`);
 const PORT = process.env.PORT || 3000;
