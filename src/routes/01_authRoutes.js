@@ -30,20 +30,47 @@ router.get('/google',
 router.get('/google/callback',
     passport.authenticate('google', { 
         failureRedirect: failureRedirectUrl,
-        successRedirect: successRedirectUrl,
         session: true 
     }),
     async (req, res) => {
         try {
             const result = await authService.handleGoogleLogin(req);
-            res.json(result);
+            
+            // 將結果存入 session
+            req.session.auth = {
+                user: result.user,
+                token: result.accessToken,
+                isAuthenticated: true
+            };
+            
+            // 確保 session 被保存
+            req.session.save((err) => {
+                if (err) {
+                    logger.error('Session 保存錯誤:', err);
+                    throw new Error('Session 保存失敗');
+                }
+                
+                // 根據用戶狀態決定重定向位置
+                const redirectUrl = new URL(successRedirectUrl);
+                
+                // 添加必要的查詢參數
+                redirectUrl.searchParams.append('login_success', 'true');
+                
+                // 重定向到前端
+                res.redirect(redirectUrl.toString());
+            });
+            
         } catch (error) {
             logger.error('登入回調錯誤:', error);
+            
+            // 登出並清除 session
             await authService.handleLogout(req.logout.bind(req));
-            res.status(500).json({
-                message: '登入過程發生錯誤',
-                error: error.message
-            });
+            req.session.destroy();
+            
+            // 重定向到錯誤頁面
+            const errorUrl = new URL(failureRedirectUrl);
+            errorUrl.searchParams.append('error', '登入失敗');
+            res.redirect(errorUrl.toString());
         }
     }
 );
