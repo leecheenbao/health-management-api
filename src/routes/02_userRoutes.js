@@ -9,7 +9,7 @@ const pagination = require('../middlewares/pagination');
 
 
 /**
- * @api {put} /api/user 01.填寫個人資料
+ * @api {put} /api/v1/user 01.填寫個人資料
  * @apiName UpdateUser
  * @apiGroup 02.用戶模組
  * @apiParam {String} name 姓名
@@ -32,7 +32,7 @@ router.put('/',
 );
 
 /**
- * @api {post} /api/user/quit 02.退出計劃
+ * @api {post} /api/v1/user/quit 02.退出計劃
  * @apiName QuitPlan
  * @apiGroup 02.用戶模組
  * @apiSuccess {String} message 退出計劃成功
@@ -46,9 +46,8 @@ router.post('/quit',
     })
 );
 
-
 /**
- * @api {get} /api/user/login-records 03.獲取登入紀錄
+ * @api {get} /api/v1/user/login-records 03.獲取登入紀錄
  * @apiName GetLoginRecords
  * @apiGroup 02.用戶模組
  * @apiSuccess {Array} records 登入記錄列表
