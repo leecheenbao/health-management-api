@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken, isAdmin } = require('../middlewares/authMiddleware');
+const { authenticateToken, isAdmin, checkProfileCompleted } = require('../middlewares/authMiddleware');
 const { validate, sanitizeData } = require('../middlewares/validator');
 const { asyncHandler } = require('../middlewares/error');
 const logger = require('../utils/logger');
@@ -15,6 +15,7 @@ const pagination = require('../middlewares/pagination');
  * @apiParam {String} name 姓名
  * @apiParam {String} hospital 院所
  * @apiParam {String} doctor_name 醟師姓名
+ * @apiParam {String} phone 手機號碼
  * @apiSuccess {Object} user 用戶資料
  */
 router.put('/',
@@ -24,6 +25,7 @@ router.put('/',
     asyncHandler(async (req, res) => {
         const userId = req.user.id;
         const data = req.body;
+        logger.info('data', data);
         const user = await userService.updateUser(userId, data);
         res.json(user);
     })
@@ -46,7 +48,7 @@ router.post('/quit',
 
 
 /**
- * @api {get} /api/user/login-records 02.獲取登入紀錄
+ * @api {get} /api/user/login-records 03.獲取登入紀錄
  * @apiName GetLoginRecords
  * @apiGroup 02.用戶模組
  * @apiSuccess {Array} records 登入記錄列表

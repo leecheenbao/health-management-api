@@ -10,7 +10,7 @@ const { notFound, errorHandler } = require('./src/middlewares/error');
 const { rateLimit: rateLimitConfig } = require('./src/middlewares/validator');
 const morgan = require('morgan');
 const logger = require('./src/utils/logger');
-const { ApiError } = require('./src/utils/apiError');
+const ApiError = require('./src/utils/ApiError');
 const { testConnection } = require('./src/config/database');
 const BASE_URL = process.env.BASE_URL;
 
@@ -65,26 +65,10 @@ app.use(`${BASE_URL}/health`, healthRoutes);
 app.use(`${BASE_URL}/user`, userRoutes);
 
 // 404 處理
-// app.use(notFound);
+app.use(notFound);
 
-// 錯誤處理中間件
-app.use((err, req, res, next) => {
-  if (err instanceof ApiError) {
-    return res.status(err.statusCode).json({
-      success: false,
-      message: err.message,
-      type: err.type
-    });
-  }
-  
-  // logger.error(logger.formatError(err));
-
-  // res.status(500).json({
-  //   success: false,
-  //   message: '服務器內部錯誤',
-  //   error: err
-  // });
-});
+// 錯誤處理
+app.use(errorHandler);
 
 logger.info(`PORT: ${process.env.PORT}`);
 const PORT = process.env.PORT || 3000;

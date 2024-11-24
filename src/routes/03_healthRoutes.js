@@ -19,7 +19,7 @@ const logger = require('../utils/logger');
  */
 router.get('/records',
   authenticateToken,
-  isAdmin,
+  // isAdmin,
   sanitizeData,                   // 數據清理
   validate,                       // 驗證數據
   asyncHandler(async (req, res) => {

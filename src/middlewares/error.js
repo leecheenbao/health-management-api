@@ -1,38 +1,40 @@
-const errorMiddleware = {
-  // 404 錯誤處理
-  notFound: (req, res, next) => {
-    const error = new Error(`找不到 - ${req.originalUrl}`);
-    res.status(404);
-    next(error);
-  },
+const ApiError = require('../utils/ApiError');
+const logger = require('../utils/logger');
 
-  // 全局錯誤處理
-  errorHandler: (err, req, res, next) => {
-    const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-    
-    // 開發環境顯示完整錯誤堆疊
-    const errorDetails = process.env.NODE_ENV === 'development' 
-      ? err.stack 
-      : {};
-
-    res.status(statusCode).json({
-      success: false,
-      message: err.message,
-      stack: errorDetails,
-      timestamp: new Date().toISOString()
-    });
-
-    // 記錄錯誤
-    console.error(`[Error] ${err.message}`);
-    console.error(err.stack);
-  },
-
-  // 異步錯誤處理包裝器
-  asyncHandler: (fn) => {
-    return (req, res, next) => {
-      Promise.resolve(fn(req, res, next)).catch(next);
-    };
-  }
+// 非同步錯誤處理包裝器
+const asyncHandler = (fn) => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-module.exports = errorMiddleware; 
+// 404 錯誤處理
+const notFound = (req, res, next) => {
+    next(ApiError.notFound('找不到請求的資源'));
+};
+
+// 統一錯誤處理
+const errorHandler = (err, req, res, next) => {
+    logger.error('Error:', err);
+
+    if (err instanceof ApiError) {
+        return res.status(err.statusCode).json({
+            success: false,
+            message: err.message,
+            type: err.type
+        });
+    }
+
+    // 其他錯誤轉換為 ApiError
+    const apiError = ApiError.internal(err.message || '服務器內部錯誤');
+    
+    res.status(apiError.statusCode).json({
+        success: false,
+        message: apiError.message,
+        type: apiError.type
+    });
+};
+
+module.exports = {
+    asyncHandler,
+    notFound,
+    errorHandler
+}; 

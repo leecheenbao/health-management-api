@@ -1,6 +1,6 @@
 const { User, LoginRecord } = require('../models');
 const { Op } = require('sequelize');
-const { ApiError } = require('../utils/apiError');
+const ApiError = require('../utils/ApiError');
 const logger = require('../utils/logger');
 
 class UserService {
@@ -11,21 +11,21 @@ class UserService {
     static async updateUser(userId, data) {
 
         // 驗證欄位
-        const { name, hospital, doctor_name } = data;
+        const { name, hospital, doctor_name, phone } = data;
 
-        if (!name || !hospital || !doctor_name) {
-            throw new ApiError(200, '請填寫完整個人資料');
+        if (!name || !hospital || !doctor_name || !phone) {
+            throw ApiError.error('請填寫完整個人資料');
         }
 
         try {
             const user = await User.findByPk(userId);
             if (!user) {
-                throw new ApiError(200, '用戶不存在');
+                throw ApiError.error('用戶不存在');
             }
             return user.update(data);
         } catch (error) {
             logger.error('編輯用戶資料失敗:', error);
-            throw new ApiError(500, '編輯用戶資料失敗');
+            throw ApiError.internal('編輯用戶資料失敗');
         }
     }
 
@@ -38,7 +38,7 @@ class UserService {
             return { message: '退出計劃成功' };
         } catch (error) {
             logger.error('退出計劃失敗:', error);
-            throw new ApiError(500, '退出計劃失敗');
+            throw ApiError.internal('退出計劃失敗');
         }
     }
 
