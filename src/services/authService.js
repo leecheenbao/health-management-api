@@ -2,6 +2,7 @@ const logger = require('../utils/logger');
 const JwtService = require('../config/jwt');
 const ApiError = require('../utils/apiError');
 const { User } = require('../models');
+const { encrypt } = require('../utils/encryption');
 
 class AuthService {
     /**
@@ -132,6 +133,54 @@ class AuthService {
         } catch (error) {
             logger.error('取得 token 錯誤:', error);
             throw error;
+        }
+    }
+
+    /**
+     * 獲取當前 session 狀態
+     * @param {Object} session Express session 對象
+     * @returns {Object} 加密後的 session 狀態
+     */
+    async getSessionStatus(session) {
+        try {
+            logger.info('處理 session 狀態請求');
+
+            if (session?.auth?.isAuthenticated) {
+                // 準備認證用戶的 session 數據
+                const sessionData = {
+                    isAuthenticated: true,
+                    user: session.auth.user,
+                    token: session.auth.token,
+                    timestamp: new Date().toISOString()
+                };
+
+                // 加密數據
+                const encryptedData = encrypt(JSON.stringify(sessionData));
+
+                logger.info('認證用戶 session 數據加密成功');
+                return {
+                    success: true,
+                    data: encryptedData
+                };
+            } else {
+                // 準備未認證用戶的 session 數據
+                const sessionData = {
+                    isAuthenticated: false,
+                    timestamp: new Date().toISOString()
+                };
+
+                // 加密數據
+                const encryptedData = encrypt(JSON.stringify(sessionData));
+
+                logger.info('未認證用戶 session 數據加密成功');
+                return {
+                    success: false,
+                    data: encryptedData
+                };
+            }
+        } catch (error) {
+            logger.error('獲取 session 狀態失敗:', error);
+            throw new Error('獲取 session 狀態失敗');
         }
     }
 }

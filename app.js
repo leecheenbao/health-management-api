@@ -10,6 +10,8 @@ const morgan = require('morgan');
 const logger = require('./src/utils/logger');
 const ApiError = require('./src/utils/ApiError');
 const { testConnection } = require('./src/config/database');
+const { testEncryption } = require('./src/utils/encryption');
+
 const BASE_URL = process.env.BASE_URL;
 
 const authRoutes = require('./src/routes/01_authRoutes');
@@ -27,9 +29,18 @@ logger.info(`BASE_URL: ${BASE_URL}`);
 // 數據庫連接測試
 testConnection();
 
+// 測試加密功能
+if (!testEncryption()) {
+    console.error('加密系統測試失敗，應用無法啟動');
+    process.exit(1);
+}
+
 // 中間件
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:8081',
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -63,6 +74,8 @@ app.use('/auth', authRoutes);
 app.use(`${BASE_URL}/health`, healthRoutes);
 app.use(`${BASE_URL}/user`, userRoutes);
 app.use(`${BASE_URL}/materials`, educationalMaterialRoutes);
+
+app.use(express.static('public'));
 
 logger.info(`PORT: ${process.env.PORT}`);
 const PORT = process.env.PORT || 3000;
