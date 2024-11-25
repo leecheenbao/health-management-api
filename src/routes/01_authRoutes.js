@@ -35,7 +35,7 @@ router.get('/google/callback',
         session: true 
     }),
     asyncHandler(async (req, res) => {
-        const redirectUrl = await authService.handleGoogleCallback(req, res);
+        const redirectUrl = await authService.handleGoogleLogin(req);
         res.redirect(redirectUrl);
     })
 );
@@ -70,17 +70,5 @@ router.post('/get-token',
         const result = await authService.getToken(req.body.email);
         res.json(result);
 }));
-
-/**
- * @api {get} /auth/session 獲取當前 session 狀態
- * @apiName GetSession
- * @apiGroup 01.登入模組
- */
-router.get('/session', 
-    asyncHandler(async (req, res) => {
-        const result = await authService.getSessionStatus(req.session);
-        res.json(result);
-    })
-);
 
 module.exports = router; 
